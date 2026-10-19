@@ -78,7 +78,7 @@ From Obsidian: **Settings → Community plugins → Browse**, search for **Auror
 
 ## Support
 
-Made by [AshOtis](https://github.com/AshOtis). If you like it, you can [buy me a coffee](https://buymeacoffee.com/ashotis). Questions or problems: open an issue, or email Hello@utilitiz.net.
+Made by [AshOtis](https://github.com/AshOtis). If you like it, you can [buy me a coffee](https://buymeacoffee.com/ashotis). Found a bug or have an idea? [Open an issue](https://github.com/AshOtis/Aurora-Clock/issues). It's the best way to reach me, and every report gets read.
 
 ## Licence
 
