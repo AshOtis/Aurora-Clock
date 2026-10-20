@@ -17,11 +17,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.release.tag_name }}
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -41,8 +41,9 @@ jobs:
           subject-path: |
             dist/main.js
             dist/manifest.json
+            dist/styles.css
 
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" dist/main.js dist/manifest.json --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/main.js dist/manifest.json dist/styles.css --clobber

@@ -15,7 +15,7 @@ const MOODS = [
   [17.5, 'Golden hour', [[251, 191, 36], [249, 115, 22], [244, 63, 94]]],
   [20.5, 'Dusk',        [[168, 85, 247], [236, 72, 153], [79, 70, 229]]]
 ];
-const DEFAULTS = { enabled: true, afterMusic: 'return' };
+const DEFAULTS = { enabled: true, afterMusic: 'return', notesGlow: false, notesStrength: 35, notesDim: 50 };
 
 /* ---------- colour maths: sRGB <-> OKLCH ---------- */
 const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
@@ -73,13 +73,24 @@ module.exports = class AuroraClock extends Plugin {
     this.addCommand({ id: 'preview-day', name: 'Preview a whole day (20 seconds)', callback: () => this.preview() });
     this.addCommand({ id: 'toggle', name: 'Turn time-of-day colours on or off', callback: () => this.setEnabled(!this.settings.enabled) });
     this.app.workspace.onLayoutReady(() => this.tick());
+    this.paintNotes();
     this.registerInterval(window.setInterval(() => this.tick(), 60 * 1000));
     // a player checks every second; look a little more often so the clock comes back soon after music stops
     this.registerInterval(window.setInterval(() => this.checkOwner(), 2 * 1000));
     this.registerDomEvent(document, 'visibilitychange', () => { if (!document.hidden) this.tick(); });
+    // the players say when they stop: take the glow back straight away instead of waiting for their stamp to go stale
+    this.registerEvent(this.app.workspace.on('ashotis:stopped', src => window.setTimeout(() => this.onPlayerStopped(src), 50)));
   }
 
-  onunload() { this.stopPreview(); this.clear(); this.unpublish(); }
+  onunload() { this.stopPreview(); this.clear(); this.unpublish(); this.paintNotes(true); }
+
+  // the aurora behind your notes: a class on <body> plus two numbers, the drawing is all in styles.css
+  paintNotes(off) {
+    const s = this.settings, on = !off && s.notesGlow;
+    document.body.toggleClass('ac-notes', on);
+    if (on) document.body.setCssProps({ '--ac-glow': String(s.notesStrength / 100), '--ac-dim': String(s.notesDim / 100) });
+    else document.body.setCssProps({ '--ac-glow': '', '--ac-dim': '' });
+  }
 
   save() { return this.saveData(this.settings); }
 
@@ -95,6 +106,14 @@ module.exports = class AuroraClock extends Plugin {
     if (!o[0]) return false;
     if (this.settings.afterMusic === 'keep') return true;               // keep the music's colours until it's switched off
     return Date.now() - Number(o[1]) < 3000;
+  }
+
+  onPlayerStopped(src) {
+    if (!this.settings.enabled || this.settings.afterMusic === 'keep') return;
+    const owner = (document.body.dataset.saOwner || '').split(':')[0];
+    if (owner && owner !== src) return;                 // a different player is still colouring the theme
+    delete document.body.dataset.saOwner;
+    this.last = null; this.tick();
   }
 
   // Every few seconds: if no player is colouring the theme but the glow isn't ours (a player stopped and
@@ -190,5 +209,16 @@ class ClockSettings extends PluginSettingTab {
         .setValue(s.afterMusic).onChange(v => { s.afterMusic = v; p.save(); p.last = null; p.tick(); }));
     new Setting(el).setName('Preview a whole day').setDesc('Runs through 24 hours in 20 seconds.')
       .addButton(b => b.setButtonText('Preview').onClick(() => p.preview()));
+
+    new Setting(el).setName('Behind your notes').setHeading();
+    new Setting(el).setName('Aurora behind your notes')
+      .setDesc('Draws the drifting aurora behind every note, in the colours of the moment (the time of day, or your music). Like Daily Board\'s Static Aurora background.')
+      .addToggle(t => t.setValue(s.notesGlow).onChange(v => { s.notesGlow = v; p.save(); p.paintNotes(); this.display(); }));
+    if (s.notesGlow) {
+      new Setting(el).setName('Glow').setDesc('How strong the aurora is.')
+        .addSlider(sl => sl.setLimits(10, 100, 5).setValue(s.notesStrength).setDynamicTooltip().onChange(v => { s.notesStrength = v; p.save(); p.paintNotes(); }));
+      new Setting(el).setName('Darken').setDesc('Dim it so your writing stays easy to read.')
+        .addSlider(sl => sl.setLimits(0, 90, 5).setValue(s.notesDim).setDynamicTooltip().onChange(v => { s.notesDim = v; p.save(); p.paintNotes(); }));
+    }
   }
 }

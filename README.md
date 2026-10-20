@@ -33,6 +33,9 @@ Install the [Static Aurora](https://github.com/AshOtis/aurora-theme) theme and t
 - **Colours follow the time of day:** turn it on or off. There's also a command for this.
 - **After the music stops:** go back to the time of day, or keep the music's colours.
 - **Preview a whole day:** watch 24 hours go by in 20 seconds. Also a command: **Aurora Clock: Preview a whole day**.
+- **Aurora behind your notes:** draws the drifting aurora behind every note, in the colours of the moment: the time of day, or your music while it plays. It's the same look as the Static Aurora background in [Daily Board](https://github.com/AshOtis/Daily-Board) and [Repo Board](https://github.com/AshOtis/Repo-Board). Off by default.
+  - **Glow** (default 35) sets how strong it is, and **Darken** (default 50) keeps your writing easy to read.
+  - A faint grain stops the soft gradients from banding. The drift stops if you turn on Static Aurora's Still background or your system's reduce-motion setting.
 
 ## For theme authors
 
@@ -70,7 +73,7 @@ this.registerEvent(this.app.workspace.on('aurora-clock:tick', ({ hour, mood, col
 
 ## Light on your computer
 
-Aurora Clock does a few small sums once a minute and only updates the theme when the colour change would be visible. It pauses while Obsidian is minimised. It uses no network and reads no files.
+Aurora Clock does a few small sums once a minute and only updates the theme when the colour change would be visible. It pauses while Obsidian is minimised. It uses no network and reads no files. The aurora behind your notes is drawn with CSS, so it costs nothing while it drifts.
 
 ## Install
 
