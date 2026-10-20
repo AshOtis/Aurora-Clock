@@ -82,4 +82,4 @@ Made by [AshOtis](https://github.com/AshOtis). If you like it, you can [buy me a
 
 ## Licence
 
-[MIT](LICENSE)
+[GNU AGPL v3 or later](LICENSE) © AshOtis
